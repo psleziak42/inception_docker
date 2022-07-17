@@ -1,2 +1,2 @@
 # inception_docker
-This project is about docker
+[connection between containers](https://www.tutorialworks.com/container-networking/)
