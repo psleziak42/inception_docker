@@ -2,29 +2,29 @@ version: "3.7"
 #defines containers
 services:
   #container name
-#  mariadb:
-#    #specify path to Dockerfile
-#    build: requirements/mariadb
-#    #specify image name
-#    image: mariadb
-#    container_name: mariadb_
-#  #when we call entrypoint script we call it from inside the container already! Hence we must specify its path inside
-#    #container. In this case I put only mariadb_entrypoint.sh because i cpied it to /usr/bin which is present in
-#    #PATH variable.
-#    #entrypoint: mariadb_entrypoint_backup.sh
-#    expose:
-#      - "3306"
-##    environment:
-##      -password: sfasdf .env file
-#    networks:
-#      - lemp
-#    #    volumes:
-#    #      - $HOME/data/db:/var/lib/mysql
-#    #restart container after reboot
-#    volumes:
-#      - mariadb:/var/lib/mysql
-#    init: true
-#    restart: always # to restart server when closed unexpectedly
+  mariadb:
+    #specify path to Dockerfile
+    build: requirements/mariadb
+    #specify image name
+    image: mariadb
+    container_name: mariadb_
+  #when we call entrypoint script we call it from inside the container already! Hence we must specify its path inside
+    #container. In this case I put only mariadb_entrypoint.sh because i cpied it to /usr/bin which is present in
+    #PATH variable.
+    #entrypoint: mariadb_entrypoint_backup.sh
+    expose:
+      - "3306"
+#    environment:
+#      -password: sfasdf .env file
+    networks:
+      - lemp
+    #    volumes:
+    #      - $HOME/data/db:/var/lib/mysql
+    #restart container after reboot
+    volumes:
+      - mariadb:/var/lib/mysql
+    init: true
+    restart: always # to restart server when closed unexpectedly
 
   wordpress:
     container_name: wordpress_
@@ -52,7 +52,7 @@ services:
     image: nginx
     ports:
 #      - "443:443" - short vs long version below
-      - "5000:443"
+      - "443:443"
 #      - target: 443
 #        host_ip: 127.0.0.1
 #        published: 443
@@ -72,13 +72,13 @@ networks:
     driver: bridge
 
 volumes:
-#  mariadb:
-#    name: mariadb_volume
-#    driver: local
-#    driver_opts:
-#      type: 'none'
-#      o: 'bind'
-#      device: /home/$USER/data/mariadb
+  mariadb:
+    name: mariadb_volume
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: /home/$USER/data/mariadb
   nginx_wordpress:
     name: nginx_wordpress
     driver: local
