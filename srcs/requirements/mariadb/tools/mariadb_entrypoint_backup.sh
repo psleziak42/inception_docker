@@ -14,24 +14,19 @@
 # Exits script if one of the commands fail
 set -e
 
-sed -i "s/^bind-address/#bind-address/" /etc/mysql/mariadb.conf.d/50-server.cnf
-sed -i 's/#port/port/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-
-# WE MUST START "SYSTEMCTL" FOR MARIADB otherwise it is impossible to exec inside
-#echo $(/etc/init.d/mysql status)
-
-#echo $(/etc/init.d/mysql start)
-
-# This command wont be necessary as we are already inside the database i guess
-# mariadb --user=root -p
-
 # Create new Database for Wordpress if it does not exist yet
-if [ ! -d /var/lib/mysql/wordpressDB ]
+if [ ! -d /var/lib/mysql/$MYSQL_DB_NAME ]
 then
+  # adding some necessary changes to configuration files
+  # it is inside if to not repeat this process after we restart container
+  sed -i "s/^bind-address/#bind-address/" /etc/mysql/mariadb.conf.d/50-server.cnf
+  sed -i 's/#port/port/g' /etc/mysql/mariadb.conf.d/50-server.cnf
+
   # We have to start mysql service in order to be albe to connect to it and make changes
   service mysql start;
 
-  mysql -e "CREATE DATABASE wordpressDB;"
+  # Create database
+  mysql -e "CREATE DATABASE $MYSQL_DB_NAME;"
   #  delete anonymous user that allows to access database without the password
   #  it is good to have during testing (that means setup) but for production
   #  (that means when we put it to the internet as ready) it should be deleted
@@ -41,19 +36,18 @@ then
   mysql -e "DROP DATABASE IF EXISTS test;"
   mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 
-  #  % means we can login as root from any IP address
+  #  % means we can login as >>root<< from any IP address
   # "GRANT ALL [PRIVILEGES is optional] ON
   # "WITH GRANT OPTION" - means that this user can grant privileges to other user at the given privilege level
-  mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'password' WITH GRANT OPTION;"
+  mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_DB_ADMIN'@'%' IDENTIFIED BY '$MYSQL_DB_A_PASS' WITH GRANT OPTION;"
 
-  # Create Regular User (only access to wordpressdb?)
   # IF NOT EXISTS - prevents us to create user if it exists and from errors
   # Currently as if [ ! -d ... ] serves as protector it is not necesary but
   # I am leaving it as in the future I may have better blueprint
-  mysql -e "CREATE USER IF NOT EXISTS 'wordpress'@'%' identified by 'wp';"
-  mysql -e "GRANT ALL PRIVILEGES ON wordpressDB.* TO 'wordpress'@'%';"
+  mysql -e "CREATE USER IF NOT EXISTS '$MYSQL_DB_USER'@'%' identified by '$MYSQL_DB_PASS';"
+  mysql -e "GRANT ALL PRIVILEGES ON $MYSQL_DB_NAME.* TO '$MYSQL_DB_USER'@'%';"
   #lub
-  #GRANT ALL ON wordpressDB.* TO 'wordpress'@'localhost' IDENTIFIED BY 'wp' WITH GRANT OPTION;
+  #GRANT ALL ON ${DATABASE}.* TO '${USER}'@'localhost' IDENTIFIED BY '${U_PW}' WITH GRANT OPTION;
   mysql -e "FLUSH PRIVILEGES;"
 
   # We must stop the service because later in Dockerfile there is command "mysqld"

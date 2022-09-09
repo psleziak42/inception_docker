@@ -1,29 +1,26 @@
 FROM debian:buster
 
 # dependency uptades are done in the image, confiugration in entrypoint
-RUN apt update -y
-RUN apt upgrade -y
-RUN apt -y install wget
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get -y install wget
 RUN wget https://wordpress.org/latest.tar.gz
 RUN chmod u+x latest.tar.gz
-RUN apt -y install tar -v
+RUN apt-get -y install tar -v
 RUN tar -xf latest.tar.gz
-# RUN mv /wordpress/* /var/www/html/
 
-# i am not sure if it needs to be configured
-RUN apt install -y php-fpm
-RUN apt install -y php-cli
-RUN apt install -y php7.3
-RUN apt install -y curl
-RUN apt install -y wget
-RUN apt install -y php-mysql
-RUN apt install -y php-mbstring
-RUN apt install -y php-xml
-RUN apt install -y sendmail
-RUN apt install -y mariadb-client
-RUN mkdir /run/php
+RUN apt-get install -y php-fpm
+RUN apt-get install -y php-cli
+RUN apt-get install -y php7.3
+RUN apt-get install -y curl
+RUN apt-get install -y wget
+RUN apt-get install -y php-mysql
+RUN apt-get install -y php-mbstring
+RUN apt-get install -y php-xml
+RUN apt-get install -y sendmail
+RUN apt-get install -y mariadb-client
 # apprently necessary to php run correctly
-# RUN mkdir -p /var/run/
+RUN mkdir -p /run/php
 
 # trying this to make cmd run with no socket error
 RUN /etc/init.d/php7.3-fpm start
