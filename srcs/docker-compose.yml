@@ -1,49 +1,72 @@
+# DOCKER COMPOSE
+# is a yaml file that is used to make working with containers more comfortable
+# with one command: DOCKER COMPOSE UP we create all listed containers, network(s)
+# and volumes instead of doing it manually:
+# .building the image with docker build [OPTIONS, eg -t name] [image name]
+# .running container with docker run [OPTIONS] image [COMMAND - entrypoint] [ARGS - cmd]
+#
+# As mentioned it is yaml file so identitation is important for proper work.configs:
+# By default all "jobs" (here containers) will start at the same time (in paralell)
+# but for this project I need to specify sequence as:
+# .database - mariadb - must be completed first in order that
+# .wordpress - with fastcgi - can connect to it.
+# .nginx goes last - not sure if that is necessary but I decided to do it that way
+#         because it works as a reverse proxy and forwards every .php request to
+#         wordpress container.
+
 version: "3.7"
-#defines containers
+
 services:
   #container name
   mariadb:
-    #specify path to Dockerfile
+    #specify path to Dockerfile - it then builds the image and...
     build: requirements/mariadb
-    #specify image name
+    #...specify image name
     image: mariadb
-    container_name: mariadb_
-  #when we call entrypoint script we call it from inside the container already! Hence we must specify its path inside
-    #container. In this case I put only mariadb_entrypoint.sh because i cpied it to /usr/bin which is present in
-    #PATH variable.
-    #entrypoint: mariadb_entrypoint_backup.sh
+    #name of the container visible after running "docker ps [-a]"
+    container_name: mariadb
+    #opens port that the container is going to listen on
     expose:
       - "3306"
-#    environment:
-#      -password: sfasdf .env file
+#    env_file: .env
+    environment:
+      - MYSQL_DB_NAME
+      - MYSQL_DB_USER
+      - MYSQL_DB_PASS
+      - MYSQL_DB_ADMIN
+      - MYSQL_DB_A_PASS
     networks:
       - lemp
-    #    volumes:
-    #      - $HOME/data/db:/var/lib/mysql
-    #restart container after reboot
     volumes:
       - mariadb:/var/lib/mysql
+    #it made my docker compose work
     init: true
+    #restart container after reboot
     restart: always # to restart server when closed unexpectedly
 
   wordpress:
     container_name: wordpress_
+    #sequence boot
     depends_on:
       - mariadb
     build: requirements/wordpress
     image: wordpress
-    #volumes: $HOME/data/wordpress:??
     expose:
       - "9000"
-#    envoronment: // or just add seds to change wp-config file
-#      -
+#    env_file: .env
+    environment:
+      - MYSQL_DB_NAME
+      - MYSQL_DB_USER
+      - MYSQL_DB_PASS
+      - DB_HOSTNAME
+      - IP
     networks:
       - lemp
     volumes:
       - nginx_wordpress:/var/www/html
     init: true
     restart: always
-#
+
   nginx:
     container_name: nginx_
     depends_on:
@@ -51,8 +74,10 @@ services:
     build: requirements/nginx
     image: nginx
     ports:
-#      - "443:443" - short vs long version below
+#     Short version:
       - "443:443"
+#     Same but written in long version:
+#      - "443:443"
 #      - target: 443
 #        host_ip: 127.0.0.1
 #        published: 443
@@ -64,15 +89,47 @@ services:
       - nginx_wordpress:/var/www/html
     init: true
     restart: always
-# assigning all containers to the same network prevents from creating default network
-# if at least one is not assigned then default network will be created
+
+# assigning all containers to the same network prevents from
+# creating default network if at least one is not assigned
+# then default network will be created.
 networks:
   lemp:
     name: lemp
     driver: bridge
 
+# WHAT ARE VOLUMES?
+#
+# SOME BULLSHIT THAT IS REPEATED BY EVERYONE EVERYWHERE:
+# Volumes are necessary so the data saved in the container is persistent.
+# Eg. In this project I use wordpress and its database. Without volume
+# any post i make in wordpress would be present only as docker runs.
+# After I restart containers, or stop them it would dissapear.
+#
+# And in truth when I comment mariadb volume and create a post in wp
+# that post is being kept after docker compose restart...
+#
+# The other volume that is shared between nginx and wordpress is
+# necessary to properly serve content between containers.
+#
+#
+# There are 3 types of volumes:
+# .named [volume_name:/container/destination/path]
+# there is folder "volume_name" created under "/var/lib/docker/volume"
+# where the data from the container is stored. We cant access it
+# from the system (at least i couldnt)
+#
+# .unnamed [:/container/destination/path]
+# same as named but instead of name system create some random hash
+#
+# .bind [host/destination/path:/container/destination/path
+# In my opinion the most useful type as we can access shared data
+# from host system (also without a need to have container running).
+
 volumes:
+  #this is volume "name" to be used when binding w/ container
   mariadb:
+    #this is just the name that appears after typing "docker ps"
     name: mariadb_volume
     driver: local
     driver_opts:
@@ -86,9 +143,3 @@ volumes:
       type: 'none'
       o: 'bind'
       device: /home/$USER/data/nginx_wordpress
-
-
-
-
-
-

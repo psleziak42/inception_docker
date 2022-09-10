@@ -23,13 +23,13 @@
 define( 'DB_NAME', '$MYSQL_DB_NAME' );
 
 /** Database username */
-define( 'DB_USER', 'wordpress' );
+define( 'DB_USER', '$MYSQL_DB_USER' );
 
 /** Database password */
-define( 'DB_PASSWORD', 'db' );
+define( 'DB_PASSWORD', '$MYSQL_DB_PASS' );
 
 /** Database hostname */
-define( 'DB_HOST', 'mariadb' );
+define( 'DB_HOST', '$DB_HOSTNAME' );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
@@ -80,7 +80,9 @@ $table_prefix = 'wp_';
  *
  * @link https://wordpress.org/support/article/debugging-in-wordpress/
  */
-define( 'WP_DEBUG', false );
+define( 'WP_DEBUG', true );
+
+define('WP_DEBUG_LOG', true);
 
 /* Add any custom values between this line and the "stop editing" line. */
 

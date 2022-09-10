@@ -3,7 +3,7 @@ FROM debian:buster
 # dependency uptades are done in the image, confiugration in entrypoint
 RUN apt-get update -y
 RUN apt-get upgrade -y
-RUN apt-get -y install wget
+RUN apt-get install wget -y
 RUN wget https://wordpress.org/latest.tar.gz
 RUN chmod u+x latest.tar.gz
 RUN apt-get -y install tar -v
