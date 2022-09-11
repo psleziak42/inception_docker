@@ -14,6 +14,7 @@ then
 
   # apparently env variables do not expand automatically in the files because no.
   # it is necessary to substitue them with themselves so it works (i ll add xD here)
+  #IT MUST BE AFTER MOVING WP FILES!!!
   sed -ie s/'$MYSQL_DB_NAME'/$MYSQL_DB_NAME/g /var/www/html/wp-config.php
   sed -ie s/'$MYSQL_DB_USER'/$MYSQL_DB_USER/g /var/www/html/wp-config.php
   sed -ie s/'$MYSQL_DB_PASS'/$MYSQL_DB_PASS/g /var/www/html/wp-config.php

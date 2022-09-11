@@ -14,13 +14,14 @@
 # Exits script if one of the commands fail
 set -e
 
+# adding some necessary changes to configuration files
+# it is inside if to not repeat this process after we restart container
+sed -i "s/^bind-address/#bind-address/" /etc/mysql/mariadb.conf.d/50-server.cnf
+sed -i 's/#port/port/g' /etc/mysql/mariadb.conf.d/50-server.cnf
+
 # Create new Database for Wordpress if it does not exist yet
 if [ ! -d /var/lib/mysql/$MYSQL_DB_NAME ]
 then
-  # adding some necessary changes to configuration files
-  # it is inside if to not repeat this process after we restart container
-  sed -i "s/^bind-address/#bind-address/" /etc/mysql/mariadb.conf.d/50-server.cnf
-  sed -i 's/#port/port/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
   # We have to start mysql service in order to be albe to connect to it and make changes
   service mysql start;

@@ -3,6 +3,7 @@ FROM debian:buster
 
 RUN apt-get update
 RUN apt-get -y upgrade
+RUN apt-get install -y vim
 RUN apt-get install -y mariadb-server
 
 COPY tools/mariadb_entrypoint_backup.sh /usr/local/bin
