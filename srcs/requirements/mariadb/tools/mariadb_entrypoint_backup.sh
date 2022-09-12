@@ -23,7 +23,7 @@ sed -i 's/#port/port/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 if [ ! -d /var/lib/mysql/$MYSQL_DB_NAME ]
 then
 
-  # We have to start mysql service in order to be albe to connect to it and make changes
+  # We have to start mysql service in order to be able to connect to it and make changes
   service mysql start;
 
   # Create database
@@ -33,6 +33,7 @@ then
   #  (that means when we put it to the internet as ready) it should be deleted
   #  for safety.
   mysql -e "DELETE FROM mysql.user WHERE User='';"
+
   #  removing test database
   mysql -e "DROP DATABASE IF EXISTS test;"
   mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
@@ -40,7 +41,7 @@ then
   #  % means we can login as >>root<< from any IP address
   # "GRANT ALL [PRIVILEGES is optional] ON
   # "WITH GRANT OPTION" - means that this user can grant privileges to other user at the given privilege level
-  mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_DB_ADMIN'@'%' IDENTIFIED BY '$MYSQL_DB_A_PASS' WITH GRANT OPTION;"
+#  mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$MYSQL_DB_ADMIN'@'%' IDENTIFIED BY '$MYSQL_DB_A_PASS' WITH GRANT OPTION;"
 
   # IF NOT EXISTS - prevents us to create user if it exists and from errors
   # Currently as if [ ! -d ... ] serves as protector it is not necesary but
@@ -49,6 +50,14 @@ then
   mysql -e "GRANT ALL PRIVILEGES ON $MYSQL_DB_NAME.* TO '$MYSQL_DB_USER'@'%';"
   #lub
   #GRANT ALL ON ${DATABASE}.* TO '${USER}'@'localhost' IDENTIFIED BY '${U_PW}' WITH GRANT OPTION;
+#  mysql -e "UPDATE mysql.user SET Password=PASSWORD('$MYSQL_DB_A_PASS') WHERE User='root';"
+
+  mysql -e "UPDATE mysql.user SET Password=PASSWORD('$MYSQL_DB_A_PASS') WHERE User='root';"
+
+#  mysql --user=root <<koniec
+#  UPDATE mysql.user SET Password=PASSWORD('$MYSQL_DB_A_PASS') WHERE User='root';
+#  koniec:q
+
   mysql -e "FLUSH PRIVILEGES;"
 
   # We must stop the service because later in Dockerfile there is command "mysqld"
