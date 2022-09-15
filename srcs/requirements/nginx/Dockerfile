@@ -1,3 +1,5 @@
+#THIS IS DOCKERFILE it is a cookbook for the image
+# TALK ABOUT GOOD PRACTICE WITH USING DOCKERFILE
 FROM    debian:buster
 
 RUN apt-get update -y

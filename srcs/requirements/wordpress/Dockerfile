@@ -3,7 +3,6 @@ FROM debian:buster
 # dependency uptades are done in the image, confiugration in entrypoint
 RUN apt-get update -y
 RUN apt-get upgrade -y
-RUN apt-get install -y vim
 RUN apt-get install wget -y
 RUN wget https://wordpress.org/latest.tar.gz
 RUN chmod u+x latest.tar.gz
@@ -32,6 +31,9 @@ RUN /etc/init.d/php7.3-fpm stop
 COPY /conf/wp-config.php /wordpress/wp-config.php
 COPY tools/wordpress_entrypoint.sh /usr/bin/
 
+#ENV DB_NAME=wordpress_db
+#ENV DB_HOST=127.0.0.1
+
 # LESSON no. 2 about ENTRYPOINT
 #
 # DOCKERFILE is not regular bash script. It is not running in sequence. I mean it is
@@ -50,7 +52,7 @@ COPY tools/wordpress_entrypoint.sh /usr/bin/
 # configure the environment inside container eg. move files, change script
 # permissions, owners, set up installed database etc.
 #
-# How to think about DOCKERFILE?
+# How to thing about DOCKERFILE?
 #
 # Think about it as a place where we create the environment.
 # This means installing dependencies (OS, all necessary applications - php, vim etc)
@@ -63,7 +65,7 @@ COPY tools/wordpress_entrypoint.sh /usr/bin/
 ENTRYPOINT ["wordpress_entrypoint.sh"]
 
 # CMD - command - are Command Line Arguments for ENTRYPOINT. So it all looks as we would
-# execute: wordpress_entrypoint.sh /usr/sbin/php-fpm7.3 --nodaemonize in bash
+# execute: wordpress_entrypoint.sh /usr/sbin/php-fpn7.3 --nodaemonize in bash
 #
 # The proper way to deal with containers is to have ONE PROCESS PER CONTAINER. This way
 # it is pretty easy to controll, as it is straight away visible which container does what

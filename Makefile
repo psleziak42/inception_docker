@@ -20,7 +20,7 @@ clean:
 fclean: destroy
 	@docker system prune -af
 	@docker image prune -af
-	@sudo rm -fr /home/$(USER)/data/mariadb /home/przemek/data/nginx_wordpress
+	sudo rm -fr /home/$(USER)/data/mariadb /home/$(USER)/data/nginx_wordpress
 
 re: fclean all
 

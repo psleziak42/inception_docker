@@ -69,6 +69,28 @@ wordpress_entrypoint.sh /usr/sbin/php-fpm7.3 --nodaemonize
 
 *more detailed info inside wordpress/Dockerfile
 
+#### _DELETE IT ALL!_
+This will remove:
+- all stopped containers
+- all networks not used by at least one container
+- all volumes not used by at least one container
+- all images without at least one container associated to them
+- all build cache - VERY IMPORTANT.
+I spent time updating things in my project to establish connection between nginx and fpm and kept failing and failing
+only to realize that nothing updates because it uses cache... ba dum tsss
+
+```sh
+docker stop $(docker ps -qa)
+docker rm $(docker ps -qa)
+docker rmi -f $(docker images -qa)
+docker volume rm $(docker volume ls -q)
+docker network rm $(docker network ls -q) 2>/dev/null
+```
+or
+```sh
+docker system prune -a --volumes
+```
+
 #### _Dockerfile Good Practice_
 Image is made from layers. Layer is each command in Dockerfile. Once layer changes all downstream layers must recreate.
 Once the image is being created, all the commands are run one after another*. But when we have an image and want to
@@ -124,7 +146,6 @@ We can exit this terminal and the container still runs!
 docker exec -it [container id/name] [bash]
 ```
 
-
 ##### _Everything inside one container or each app in separate container?_
 
 The question arises due past 42's project "ft_server" which was very similar with this difference that all the system
@@ -174,13 +195,111 @@ also network(s), volume(s) etc. Some instructions like environment/expose could 
 this point of my journey I would say to put DEPENDENCIES in the Dockerfile, CONFIGURATION in entrypoint.sh and all
 the rest is handy to have with docker-compose which will be our main file from now on.
 
-### Missing commands and bash commands, info about .env file maybe some info about configuration but its already a lot.
+#### _.env file_
+.env file is a common file to protect fragile data from 3rd party. In Poland we say that the darkest spot is where the
+light shines the most. It may sound funny but once people focus on super-turbo-bullet-(or hacker-)proof apps, they may
+forget about human errors. And if you look carefully in the repo I made that mistake too, same as some of my 42 friends,
+when forgetting to .gitignore .env file before submitting project to the repo. There are github-crawlers(boots) that
+just look for this type of files to get access to your app. 
 
+So env file is used to cover any data you find fragile via MACRO. This file must be placed on the same level as
+docker-compose file. In docker-compose there is "environment" indentation where we pass that macro to container's
+environmental variables. Another way is to use "env_file" and just specify the path to the file - this way we get all
+the macros (have in mind that only some of them may be necessary inside that particular container).
+
+
+#### _docker api_
+##### _The best way to check avaliable commands is to type docker image/container/etc --help. Below are just few that
+I used when working on the project_
+
+Must add word "docker" before every command presented here.
+######_image:_
+- build: build [-t name:tag/OPTIONS] path/do/dockerfile/
+- remove: rmi [image name or $(docker images -aq) to remove all images]
+
+######_container:_
+- build: run [-d (daemon) or -it (interactive terminal) -p 4242(host:port):80(docker app port)/OPTIONS] contain. name/id
+- start/stop/restart/remove: start/stop/restart/rm container name/id
+  first we should stop container(s) and later remove it. But if you want to stop and remove at the same time then:
+- stop+remove: rm -f(force) container name/id
+- running container: ps
+- existing container: ps -a
+- network/volume: container inspect container name/id | grep -i "network/volume"
+
+######_volumes:_
+- create: volume create volume_name -> it is not necessary to run this command, it is better to use docker compose
+- inspect: volume inspect volume_name -> gives info about the volume, including where it is stored
+EXAMPLE OF USE (bind volume)
+- host/folder:/destination/path/on/container/:ro - :ro/rw read-only/read-write. 
+:ro means docker can't change the volume folder
+
+######_network:_
+
+######_attach to the container:_
+This is the best way to connect to the container. First make it run (docker ps to check if it runs) and later:
+```sh
+docker exec -it [container id/name] [bash] mysql -p
+```
+I was trying many times to 'run' container wiht -it flag that first create an image and attach to it, but its
+gonna mess you in the head, so its better to make it step by step.
+
+docker exec -it [CONTAINER_NAME or ID] [CMD] mysql -p
+
+#### _some bash commands_
+
+- if [! - ... ] - reversion
+- if [ -n ... ] - if string is null - STRING="", $STRING is null in that case.
+- if [ -z ... ] - if string is not null
+- if [ -d ... ] - if directory exists
+- if [ -f ... ] - if file exists
+-- 
+```sh
+bash_script.sh arg1 arg2 agr3 ... argn
+```
+- $0 = bash_script.sh
+- $1-n = arg1-n
+- $@ $* - all arguments
+- $# - number of arguments (name is not counting)
+
+- $@ - refers to all arguments (one by one)
+
+### _Configuration_
+I do not want to spend much time describing how to configure the subject. But one thing worth to mention is that
+_EVERYTHING IS A FILE_. Magic no? For me it kinda was and it was 1st good time when I got to work with just files that
+when changed affect functionality of the service. And in my opinion it was the most valuable lesson. Containers are
+in the same network. What it means? If dont know go back to _NetPractice_. It means they can see each other and exchange
+informations. But in order to do so you must properly set up listening port and ip in fpm, proxy pass to correct addres
+and port, put proper credentials in fmp to connect with DB.
+
+And if someone says this project is so easy and did it in a weekend without having previous experience, dont take it to 
+yourself as I many times do, but at worse case put that -42 cheating flag on him ;). This project requires time and the
+best students from 42Lisbon who assisted me can confirm that.
+
+
+## CONCLUSION
+Docker is not easy. Or let us put it with different words: it is not hard but on the beginning it frustrated me
+enough times to write down this small tutorial, including descriptions inside documents that specified ongoing. When
+starting (and sometimes even now when it comes to volumes) I had the feeling that depending from the day of the week (or
+year!) it works differently. This is the reason why I think _attach to the container_ is very important tip for start:
+FIND YOUR WAY OF WORKING WITH IT AND STICK TO IT. There is so many ways to achieve the same thing that the number of
+paths is just confusing. You could do this project in totally different way - maybe putting more work inside Dockerfile
+and resigning from entrypoint.sh or get rid of docker-compose.yaml and put "100" docker build docker run in makefile.
+I chose "my" path after suggestions from other friends from 42. Much thanks here to _@dcavalei_ who gave me the most
+support among others _@jpceia_, _@ricardomartins26_ and _@olbrien_ who helped me at the last stage of wordpress.
+
+##### _First thing last:_
+manuals hurt, but official docker page is almost written like a nice blog and that feeling of human softness visible
+there makes me try to convince you to take a look on the official docker documentation. It will answer some of your
+questions.
+ 
 [magic behind docker](https://www.youtube.com/watch?v=-YnMr1lj4Z8&t=368s)
+
 [connection between containers](https://www.tutorialworks.com/container-networking/)
 
 [https explained in general](https://www.youtube.com/watch?v=T4Df5_cojAs)
+
 [https explained in detail](https://www.youtube.com/watch?v=-f4Gbk-U758)
+
 [nginx w/ certificate and 443](https://mindsers.blog/post/https-using-nginx-certbot-docker/)
 
 [security headers and clickjacking](https://www.freecodecamp.org/news/docker-nginx-letsencrypt-easy-secure-reverse-proxy-40165ba3aee2/)

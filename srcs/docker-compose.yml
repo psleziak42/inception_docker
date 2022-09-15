@@ -35,6 +35,8 @@ services:
       - MYSQL_DB_PASS
       - MYSQL_DB_ADMIN
       - MYSQL_DB_A_PASS
+      - MYSQL_DB_R
+      - MYSQL_DB_R_PASS
     networks:
       - lemp
     volumes:

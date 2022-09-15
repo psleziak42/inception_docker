@@ -18,7 +18,6 @@ then
 
   # This can substitue -g flag in CMD dockerfile. nginx \-g\ - goest to the file and substitue \daemon off'\
   sed -ie 's/gzip on;/gzip off;/g' /etc/nginx/nginx.conf
-
   # Command check if configuration file is ok.
   nginx -t
 fi
