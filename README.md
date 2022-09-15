@@ -236,7 +236,7 @@ EXAMPLE OF USE (bind volume)
 
 ###### _network:_
 
-######_attach to the container:_
+###### _attach to the container:_
 This is the best way to connect to the container. First make it run (docker ps to check if it runs) and later:
 ```sh
 docker exec -it [container id/name] [bash] mysql -p
