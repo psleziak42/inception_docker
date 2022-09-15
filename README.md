@@ -146,7 +146,8 @@ We can exit this terminal and the container still runs!
 docker exec -it [container id/name] [bash]
 ```
 
-##### _Everything inside one container or each app in separate container?_
+
+_Everything inside one container or each app in separate container?_
 
 The question arises due past 42's project "ft_server" which was very similar with this difference that all the system
 was placed inside one container. In that case it would be similar as having separate computer (similar concept to VM)
@@ -213,11 +214,11 @@ the macros (have in mind that only some of them may be necessary inside that par
 I used when working on the project_
 
 Must add word "docker" before every command presented here.
-######_image:_
+###### _image:_
 - build: build [-t name:tag/OPTIONS] path/do/dockerfile/
 - remove: rmi [image name or $(docker images -aq) to remove all images]
 
-######_container:_
+###### _container:_
 - build: run [-d (daemon) or -it (interactive terminal) -p 4242(host:port):80(docker app port)/OPTIONS] contain. name/id
 - start/stop/restart/remove: start/stop/restart/rm container name/id
   first we should stop container(s) and later remove it. But if you want to stop and remove at the same time then:
@@ -226,14 +227,14 @@ Must add word "docker" before every command presented here.
 - existing container: ps -a
 - network/volume: container inspect container name/id | grep -i "network/volume"
 
-######_volumes:_
+###### _volumes:_
 - create: volume create volume_name -> it is not necessary to run this command, it is better to use docker compose
 - inspect: volume inspect volume_name -> gives info about the volume, including where it is stored
 EXAMPLE OF USE (bind volume)
 - host/folder:/destination/path/on/container/:ro - :ro/rw read-only/read-write. 
 :ro means docker can't change the volume folder
 
-######_network:_
+###### _network:_
 
 ######_attach to the container:_
 This is the best way to connect to the container. First make it run (docker ps to check if it runs) and later:
